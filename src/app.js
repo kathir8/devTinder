@@ -3,9 +3,17 @@ const app = express();
 
 const port = 3000;
 
+const {userAuth, adminAuth} = require("./middlewares/auth");
+
 // Request handler
 
 //app.use("/route", rH, [rH2, rH3], rH4, rh5);
+
+app.get('/admin', adminAuth, (req,res)=>{
+    res.sendq("Admin route is working!!");
+})
+
+app.use("/user", userAuth);
 
 app.get(
   "/user",
