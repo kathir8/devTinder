@@ -10,7 +10,13 @@ const {userAuth, adminAuth} = require("./middlewares/auth");
 //app.use("/route", rH, [rH2, rH3], rH4, rh5);
 
 app.get('/admin', adminAuth, (req,res)=>{
-    res.sendq("Admin route is working!!");
+    try {
+        res.send("Admin route is working!!");
+        throw new Error("random error");
+        
+    } catch (error) {
+        res.status(500).send("try catch error!!");
+    }
 })
 
 app.use("/user", userAuth);
@@ -61,8 +67,11 @@ app.use("/user",(req,res) => {
 });
 
 
-app.use("/",(req,res) => {
-    res.send('use will matches all http (get, post, delete, put) request');
+app.use("/",(err,req,res) => {
+    if(err){
+        res.status(500).send("Wild card handling error!!");
+    }
+    console.log('use will matches all http (get, post, delete, put) request');
 });
 
 
