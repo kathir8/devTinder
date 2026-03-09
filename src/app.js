@@ -51,8 +51,8 @@ app.get('/feed', async (req, res) => {
 
 // Delete user by ID
 app.delete("/user", async (req, res) => {
- const userId = req.body.userId;
-   try {
+  const userId = req.body.userId;
+  try {
     const users = await User.findByIdAndDelete(userId);
     res.send("User deleted successfully");
   } catch (err) {
@@ -61,11 +61,11 @@ app.delete("/user", async (req, res) => {
 });
 
 // Update user by ID
-app.patch("/user", async(req,res)=>{
+app.patch("/user", async (req, res) => {
   const data = req.body;
   const userId = data.userId;
   try {
-    const users = await User.findByIdAndUpdate(userId, data);
+    const users = await User.findByIdAndUpdate(userId, data, { runValidators: true });
     res.send("User updated successfully");
   } catch (err) {
     res.status(400).send('Error updating user: ' + err.message);
