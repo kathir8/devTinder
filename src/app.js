@@ -53,7 +53,7 @@ app.get('/feed', async (req, res) => {
 app.delete("/user", async (req, res) => {
   const userId = req.body.userId;
   try {
-    const users = await User.findByIdAndDelete(userId);
+    await User.findByIdAndDelete(userId);
     res.send("User deleted successfully");
   } catch (err) {
     res.status(400).send('Error deleting user: ' + err.message);
@@ -61,13 +61,21 @@ app.delete("/user", async (req, res) => {
 });
 
 // Update user by ID
-app.patch("/user", async (req, res) => {
+app.patch("/user/:userId", async (req, res) => {
   const data = req.body;
-  const userId = data.userId;
+  const userId = req.params?.userId;
   try {
-    const users = await User.findByIdAndUpdate(userId, data, { runValidators: true });
+    const ALLOWED_UPDATES = ["photoUrl", "about", "skills", "age", "gender", "emailId"];
+    const isUpdateAllowed = Object.keys(data).every(v => ALLOWED_UPDATES.includes(v));
+
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed!!");
+    }
+
+    await User.findByIdAndUpdate(userId, data, { runValidators: true });
     res.send("User updated successfully");
   } catch (err) {
+
     res.status(400).send('Error updating user: ' + err.message);
   }
 });
