@@ -7,8 +7,9 @@ const { validateSignUpData, loginValidation } = require('./utils/validation');
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const { userAuth } = require('./middlewares/auth');
 const SECRET_KEY = 'devTinderSecretKey';
-
+const EXPIRY_DAYS = 7;
 app.use(express.json());
 app.use(cookieParser());
 
@@ -58,7 +59,7 @@ app.post('/login', async (req, res) => {
       throw new Error('Invalid credentials');
     }
 
-    const token = jwt.sign({ _id: user._id }, SECRET_KEY);
+    const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: EXPIRY_DAYS + 'd' });
     res.cookie('token', token);
 
     res.status(200).send('Login successful');
@@ -85,25 +86,13 @@ app.get('/user', async (req, res) => {
 });
 
 // Fetch profile
-app.get('/profile', async (req, res) => {
+app.get('/profile', userAuth, async (req, res) => {
   try {
-    const cookie = req.cookies;
-    const { token } = cookie;
-    if (!token) {
-      throw new Error('Authentication token not found');
-    }
-    const decoded = jwt.verify(token, SECRET_KEY);
-    const _id = decoded._id;
-    const users = await User.findById(_id);
-    if (!users) {
-      return res.status(404).send('User not found');
-    } else {
-      res.send(users);
-    }
+    const user = req.user;
+    res.send(user);
   } catch (err) {
     res.status(400).send('Error fetching user: ' + err.message);
   }
-
 });
 
 

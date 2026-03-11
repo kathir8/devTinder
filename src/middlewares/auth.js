@@ -1,21 +1,29 @@
-const adminAuth = (req,res,next)=>{
-    console.log("Admin auth is checking");
-    const token = "xyz";
-    if(token !== "xyz"){
-        res.status(401).send("Unauthorized!!");
+const jwt = require("jsonwebtoken");
+const SECRET_KEY = 'devTinderSecretKey';
+const User  = require("../models/user");
+
+const userAuth = async (req, res, next) => {
+    try {
+        const { token } = req.cookies;
+        
+        if (!token) {
+            throw new Error("Authentication token not found");
+        }
+
+        const decodedobj = jwt.verify(token, SECRET_KEY);
+        const { _id } = decodedobj;
+        const user = await User.findById(_id);
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        req.user = user;
+        next();
+    } catch (err) {
+        res.status(401).send('Error: ' + err.message);
     }
-    next();
+
 }
 
 
-const userAuth = (req, res, next) => {
-    console.log("User auth is checking");
-    const token = "abc";
-    if(token !== "abc"){
-        res.status(401).send("Unauthorized!!");
-    }
-    next();
-    
-}
-
-module.exports = {adminAuth, userAuth};
+module.exports = { userAuth };
