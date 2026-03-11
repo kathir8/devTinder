@@ -5,8 +5,12 @@ const port = 3000;
 const User = require('./models/user');
 const { validateSignUpData, loginValidation } = require('./utils/validation');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = 'devTinderSecretKey';
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signup', async (req, res) => {
 
@@ -53,6 +57,10 @@ app.post('/login', async (req, res) => {
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }
+
+    const token = jwt.sign({ _id: user._id }, SECRET_KEY);
+    res.cookie('token', token);
+
     res.status(200).send('Login successful');
 
   } catch (err) {
@@ -66,6 +74,28 @@ app.get('/user', async (req, res) => {
   try {
     const users = await User.find({ emailId: userEmail });
     if (users.length === 0) {
+      return res.status(404).send('User not found');
+    } else {
+      res.send(users);
+    }
+  } catch (err) {
+    res.status(400).send('Error fetching user: ' + err.message);
+  }
+
+});
+
+// Fetch profile
+app.get('/profile', async (req, res) => {
+  try {
+    const cookie = req.cookies;
+    const { token } = cookie;
+    if (!token) {
+      throw new Error('Authentication token not found');
+    }
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const _id = decoded._id;
+    const users = await User.findById(_id);
+    if (!users) {
       return res.status(404).send('User not found');
     } else {
       res.send(users);
@@ -123,6 +153,15 @@ app.patch("/user/:userId", async (req, res) => {
 });
 
 
+app.use("/", (err, req, res, next) => {
+  if (err) {
+    res.status(500).send("Wild card handling error!!");
+  }
+  console.log('use will matches all http (get, post, delete, put) request');
+});
+
+
+
 connectDB()
   .then(() => {
     console.log('Database connected successfully');
@@ -134,12 +173,6 @@ connectDB()
   });
 
 
-app.use("/", (err, req, res) => {
-  if (err) {
-    res.status(500).send("Wild card handling error!!");
-  }
-  console.log('use will matches all http (get, post, delete, put) request');
-});
 
 
 app.listen(port, () => {
