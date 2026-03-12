@@ -22,4 +22,14 @@ const loginValidation = (req) => {
     }
 }
 
-module.exports = { validateSignUpData, loginValidation };
+
+const validateEditProfileData = (req) => {
+    const allowedEditFields = ["photoUrl", "about", "skills", "age", "gender", "lastName"];
+    const editDataKeys = Object.keys(req.body);
+    const isEditAllowed = editDataKeys.every(field => allowedEditFields.includes(field));
+    if (!isEditAllowed) {
+        throw new Error("Invalid edit request!");
+    }
+    req.editDataKeys = editDataKeys;
+}
+module.exports = { validateSignUpData, loginValidation, validateEditProfileData };

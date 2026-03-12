@@ -58,20 +58,9 @@ authRouter.post('/signup', async (req, res) => {
 
 });
 
-// Get user by email
-authRouter.get('/user', async (req, res) => {
-    const userEmail = req.body.email;
-    try {
-        const users = await User.find({ emailId: userEmail });
-        if (users.length === 0) {
-            return res.status(404).send('User not found');
-        } else {
-            res.send(users);
-        }
-    } catch (err) {
-        res.status(400).send('Error fetching user: ' + err.message);
-    }
-
+authRouter.get('/logout', async (req, res) => {
+    res.cookie('token', null, { expires: new Date(Date.now()) })
+        .send('Logout successful');
 });
 
 module.exports = authRouter;
