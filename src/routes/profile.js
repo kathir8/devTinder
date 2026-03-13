@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const profileRouter = express.Router();
 
 const { userAuth } = require('../middlewares/auth');
@@ -32,5 +33,27 @@ profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
         res.status(400).send('Error : ' + err.message);
     }
 });
+
+profileRouter.patch('/profile/password', userAuth, async (req, res) => {
+    try {
+        const loggedinUser = req.user;
+        const { oldPassword, newPassword } = req.body;
+
+        const passwordMatch = await loggedinUser.validatePassword(oldPassword);
+        if (!passwordMatch) {
+            throw new Error("Old password does not match");
+        }
+
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        loggedinUser.password = passwordHash;
+        await loggedinUser.save();
+        res.send('Password saved successfully');
+
+    } catch (err) {
+        res.status(400).send('Error : ' + err.message);
+    }
+});
+
+
 
 module.exports = { profileRouter };
