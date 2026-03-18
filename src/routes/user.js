@@ -31,6 +31,7 @@ userRouter.get('/user/requests/received', userAuth, async (req, res) => {
 userRouter.get('/user/connections', userAuth, async (req, res) => {
     try {
         const loggedInUserId = req.user._id;
+
         const connectionRequests = await ConnectionRequest.find({
             $or: [
                 { toUserId: loggedInUserId, status: 'accepted' },
@@ -41,7 +42,7 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
             .populate('toUserId', USER_SAFE_DATA);
 
         const data = connectionRequests.map(row => {
-            if (row.fromUserId._id.toString() === loggedInUserId) {
+            if (row.fromUserId._id.equals(loggedInUserId)) {
                 return row.toUserId;
             }
             return row.fromUserId;
@@ -58,7 +59,7 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
 userRouter.get('/user/feed', userAuth, async (req, res) => {
     try {
         const loggedInUser = req.user;
-        
+
         const page = parseInt(req.query.page) || 1;
         let limit = parseInt(req.query.limit) || 10;
         limit = limit > 50 ? 50 : limit;
