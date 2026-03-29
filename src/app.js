@@ -3,14 +3,13 @@ const app = express();
 const cookieParser = require('cookie-parser');
 
 const connectDB = require('./config/database');
-const port = 3000;
 
-const User = require('./models/user');
 const authRouter = require('./routes/auth');
 const { profileRouter } = require('./routes/profile');
 const { requestRouter } = require('./routes/request');
 const userRouter = require('./routes/user');
 const cors = require('cors');
+require('dotenv').config();
 
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -29,8 +28,8 @@ app.use('/', userRouter);
 connectDB()
   .then(() => {
     console.log('Database connected successfully');
-    app.listen(port, () => {
-      console.log('Server is running on ' + 'http://localhost:' + port);
+    app.listen(process.env.PORT, () => {
+      console.log('Server is running on ' + 'http://localhost:' + process.env.PORT);
     });
   }).catch((err) => {
     console.error('Database connection failed:', err);
@@ -39,6 +38,6 @@ connectDB()
 
 
 
-app.listen(port, () => {
-  console.log('Server is running on ' + 'http://localhost:' + port);
+app.listen(process.env.PORT, () => {
+  console.log('Server is running on ' + 'http://localhost:' + process.env.PORT);
 });

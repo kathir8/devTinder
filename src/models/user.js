@@ -3,7 +3,6 @@ var validator = require('validator');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = 'devTinderSecretKey';
 const EXPIRY_DAYS = 7;
 
 const userSchema = new mongoose.Schema(
@@ -69,7 +68,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.methods.getJWT = function () {
     const user = this;
-    const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: EXPIRY_DAYS + 'd' });
+    const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, { expiresIn: EXPIRY_DAYS + 'd' });
     return token;
 }
 
